@@ -32,7 +32,7 @@ const Hero = () => {
           <div>
             <div className="hero-eyebrow">
               <span className="dot"></span>
-              A subagent for Claude Code · built at the Anthropic hackathon
+              A subagent for Claude Code · submitted to the Anthropic hackathon
             </div>
             <h1>
               Claude Code is great<br/>on day one.<br/>

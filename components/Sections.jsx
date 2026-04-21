@@ -158,10 +158,57 @@ const Install = () => {
             </div>
           </div>
 
+          <div className="authors">
+            <div className="authors-label">Built by</div>
+            <div className="authors-grid">
+              <a className="author" href="https://www.linkedin.com/in/pavanchow/" target="_blank" rel="noreferrer noopener">
+                <span className="author-avatar author-avatar-pavan" aria-hidden="true">
+                  <svg viewBox="0 0 64 64" width="48" height="48">
+                    <defs>
+                      <linearGradient id="av-p" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0" stopColor="#2C3A55"/>
+                        <stop offset="1" stopColor="#1A2333"/>
+                      </linearGradient>
+                    </defs>
+                    <circle cx="32" cy="32" r="32" fill="url(#av-p)"/>
+                    <circle cx="32" cy="25" r="10" fill="#E8E1D0"/>
+                    <path d="M12 58c2-11 10-16 20-16s18 5 20 16" fill="#E8E1D0"/>
+                    <path d="M22 20c2-6 8-10 15-8s10 8 8 14c-2-3-5-4-8-3-3-5-9-6-15-3z" fill="#3E2C1F"/>
+                  </svg>
+                </span>
+                <span className="author-body">
+                  <span className="author-name">Pavan N</span>
+                  <span className="author-role">LinkedIn ↗</span>
+                </span>
+              </a>
+              <a className="author" href="https://www.linkedin.com/in/dina-m-0388462a3/" target="_blank" rel="noreferrer noopener">
+                <span className="author-avatar author-avatar-dina" aria-hidden="true">
+                  <svg viewBox="0 0 64 64" width="48" height="48">
+                    <defs>
+                      <linearGradient id="av-d" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0" stopColor="#8C4A36"/>
+                        <stop offset="1" stopColor="#5E2F22"/>
+                      </linearGradient>
+                    </defs>
+                    <circle cx="32" cy="32" r="32" fill="url(#av-d)"/>
+                    <circle cx="32" cy="26" r="10" fill="#E8E1D0"/>
+                    <path d="M12 58c2-11 10-16 20-16s18 5 20 16" fill="#E8E1D0"/>
+                    <path d="M17 26c0-10 7-16 15-16s15 6 15 16c0 4-1 7-3 9v-9c-3 2-8 3-12 3s-9-1-12-3v9c-2-2-3-5-3-9z" fill="#2A1410"/>
+                    <path d="M16 32c-2 8 0 16 6 21l2-12c-4-2-7-5-8-9z" fill="#2A1410"/>
+                    <path d="M48 32c2 8 0 16-6 21l-2-12c4-2 7-5 8-9z" fill="#2A1410"/>
+                  </svg>
+                </span>
+                <span className="author-body">
+                  <span className="author-name">Dina M</span>
+                  <span className="author-role">LinkedIn ↗</span>
+                </span>
+              </a>
+            </div>
+          </div>
+
           <div className="install-meta">
-            <div className="install-meta-item">MIT licensed · built at the Anthropic hackathon</div>
-            <div className="install-meta-item">Authors: <a href="https://www.linkedin.com/in/pavanchow/" target="_blank">Pavan N</a> · <a href="https://www.linkedin.com/in/dina-m-0388462a3/" target="_blank">Dina M</a></div>
-            <div className="install-meta-item">Source: <a href="https://github.com/pavanchow/Codebase-Cartographer" target="_blank">github.com/pavanchow/Codebase-Cartographer</a></div>
+            <div className="install-meta-item">MIT licensed · submitted to the Anthropic hackathon <span className="install-meta-pill">awaiting selection</span></div>
+            <div className="install-meta-item">Source: <a href="https://github.com/pavanchow/Codebase-Cartographer" target="_blank" rel="noreferrer noopener">github.com/pavanchow/Codebase-Cartographer</a></div>
           </div>
         </div>
       </div>

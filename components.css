@@ -361,3 +361,62 @@
 .install-meta-item { font: 400 13px var(--font-mono); color: var(--term-dim); }
 .install-meta-item a { color: var(--term-muted); text-decoration: none; border-bottom: 1px dotted var(--term-dim); }
 .install-meta-item a:hover { color: var(--term-fg); }
+.install-meta-pill {
+  display: inline-block; margin-left: 6px;
+  padding: 2px 8px;
+  font: 500 10px var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--term-yellow);
+  background: rgba(216, 168, 77, 0.12);
+  border: 1px solid rgba(216, 168, 77, 0.25);
+  border-radius: 999px;
+}
+
+/* ---------- AUTHORS PANEL ---------- */
+.authors {
+  margin: 8px 0 32px;
+  padding: 24px 28px;
+  background: var(--term-bg-2);
+  border: 1px solid rgba(232, 225, 208, 0.1);
+  border-radius: var(--radius-lg);
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 20px 36px;
+  align-items: center;
+}
+@media (max-width: 720px) { .authors { grid-template-columns: 1fr; gap: 16px; } }
+.authors-label {
+  font: 500 11px var(--font-mono);
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--term-muted);
+}
+.authors-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+}
+@media (max-width: 560px) { .authors-grid { grid-template-columns: 1fr; } }
+.author {
+  display: flex; align-items: center; gap: 14px;
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  transition: background var(--dur-fast);
+}
+.author:hover { background: rgba(232, 225, 208, 0.04); }
+.author-avatar {
+  flex: 0 0 auto;
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: inline-flex; align-items: center; justify-content: center;
+  box-shadow: 0 0 0 2px rgba(232, 225, 208, 0.15);
+}
+.author-avatar svg { display: block; }
+.author-body { display: flex; flex-direction: column; gap: 2px; }
+.author-name {
+  font: 500 16px var(--font-sans);
+  color: var(--term-fg);
+  letter-spacing: -0.01em;
+}
+.author-role {
+  font: 400 12px var(--font-mono);
+  color: var(--clay-300);
+}
