@@ -1,0 +1,67 @@
+name: Deploy Cartographer demo to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Assemble site
+        run: |
+          mkdir -p _site
+          # Copy everything needed for the live demo
+          cp -r assets preview ui_kits _site/
+          cp colors_and_type.css _site/
+          cp README.md _site/ 2>/dev/null || true
+
+          # Landing page that redirects to the app demo
+          cat > _site/index.html <<'HTML'
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8"/>
+            <title>Cartographer — Design System & Demo</title>
+            <meta http-equiv="refresh" content="0; url=./ui_kits/cartographer-app/index.html"/>
+            <style>
+              body { font-family: Inter, system-ui, sans-serif; background:#F9FAFB; color:#111827; padding:48px; }
+              a { color:#3B4BDB; }
+            </style>
+          </head>
+          <body>
+            <h1>Cartographer</h1>
+            <p>Redirecting to the live demo…</p>
+            <p><a href="./ui_kits/cartographer-app/index.html">Open the app demo</a></p>
+          </body>
+          </html>
+          HTML
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
