@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="card.css"></head>
+<body><div class="card">
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+    <!-- default -->
+    <div>
+      <div class="name" style="margin-bottom:6px;">Search modules</div>
+      <input placeholder="e.g. auth/session" style="width:100%; box-sizing:border-box; padding:7px 10px; border:1px solid #D1D5DB; border-radius:4px; font:400 13px Inter, sans-serif; color:#1F2937;"/>
+    </div>
+    <!-- focused -->
+    <div>
+      <div class="name" style="margin-bottom:6px;">Depth limit</div>
+      <input value="6" style="width:100%; box-sizing:border-box; padding:7px 10px; border:1px solid #4F5FE8; border-radius:4px; font:500 13px 'JetBrains Mono', monospace; color:#111827; outline:3px solid rgba(59,75,219,0.22);"/>
+    </div>
+    <!-- error -->
+    <div>
+      <div class="name" style="margin-bottom:6px;">Repo URL</div>
+      <input value="github.com/acme/missing-repo" style="width:100%; box-sizing:border-box; padding:7px 10px; border:1px solid #EF4444; border-radius:4px; font:400 13px Inter, sans-serif; color:#111827;"/>
+      <div style="font:400 11px Inter; color:#B91C1C; margin-top:4px;">Cartographer can't reach this repo. Check access.</div>
+    </div>
+    <!-- disabled -->
+    <div>
+      <div class="name" style="margin-bottom:6px;">Branch</div>
+      <input value="main" disabled style="width:100%; box-sizing:border-box; padding:7px 10px; border:1px solid #E5E7EB; border-radius:4px; font:400 13px Inter; color:#9CA3AF; background:#F9FAFB;"/>
+    </div>
+  </div>
+  <div class="meta" style="margin-top:14px;">default · focus (halo) · error · disabled</div>
+</div></body></html>

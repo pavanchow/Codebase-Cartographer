@@ -1,0 +1,30 @@
+/* Preview card base — keep cards minimal; no titles/framing in the card */
+@import url("../colors_and_type.css");
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: #FFFFFF;
+  color: var(--fg-primary);
+  font-family: var(--font-sans);
+  font-size: 14px;
+}
+
+.card {
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.row { display: flex; align-items: center; gap: 12px; }
+.col { display: flex; flex-direction: column; gap: 12px; }
+.grid { display: grid; gap: 12px; }
+
+.swatch {
+  border-radius: 6px;
+  border: 1px solid var(--border-default);
+  box-sizing: border-box;
+}
+
+.meta { font-size: 11px; color: var(--fg-muted); font-family: var(--font-mono); letter-spacing: 0.02em; }
+.name { font-size: 12px; color: var(--fg-secondary); font-weight: 500; }
+.val  { font-family: var(--font-mono); font-size: 11px; color: var(--fg-muted); }

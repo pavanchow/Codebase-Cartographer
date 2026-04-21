@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=1440"/>
+  <title>Cartographer — acme-monorepo</title>
+  <link rel="icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='4' fill='%233B4BDB'/></svg>"/>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Icons -->
+  <script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
+
+  <!-- React + Babel (pinned) -->
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+  <style>
+    /* ===== TOKENS ===== */
+    :root {
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+      --gray-0:#FFFFFF; --gray-50:#F9FAFB; --gray-100:#F3F4F6; --gray-150:#ECEEF2;
+      --gray-200:#E5E7EB; --gray-300:#D1D5DB; --gray-400:#9CA3AF; --gray-500:#6B7280;
+      --gray-600:#4B5563; --gray-700:#374151; --gray-800:#1F2937; --gray-900:#111827;
+
+      --brand-50:#EEF2FF; --brand-100:#E0E7FF; --brand-200:#C7D2FE; --brand-300:#A5B4FC;
+      --brand-400:#7C8CF8; --brand-500:#4F5FE8; --brand-600:#3B4BDB; --brand-700:#2F3BB8;
+      --brand-800:#262E8F; --brand-900:#1E2570;
+
+      --success-50:#ECFDF5; --success-500:#10B981; --success-700:#047857;
+      --warning-50:#FFFBEB; --warning-500:#F59E0B; --warning-700:#B45309;
+      --danger-50:#FEF2F2;  --danger-500:#EF4444;  --danger-700:#B91C1C;
+
+      --fg-strong:var(--gray-900); --fg-primary:var(--gray-800); --fg-secondary:var(--gray-600);
+      --fg-muted:var(--gray-500); --fg-inverse:var(--gray-0);
+      --border-subtle:var(--gray-150); --border-default:var(--gray-200); --border-strong:var(--gray-300);
+      --bg-selected:var(--brand-50);
+      --dur-fast:120ms; --ease-standard:cubic-bezier(0.2,0,0,1);
+    }
+
+    * { box-sizing: border-box; }
+    html, body, #root {
+      margin: 0; padding: 0; height: 100%;
+      background: var(--gray-0);
+      color: var(--fg-primary);
+      font-family: var(--font-sans);
+      font-size: 14px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: 56px 1fr 360px;
+      grid-template-rows: 48px 1fr 28px;
+      grid-template-areas:
+        "topbar topbar topbar"
+        "nav    main   inspect"
+        "nav    status status";
+      height: 100vh;
+    }
+
+    /* TOPBAR */
+    .topbar {
+      grid-area: topbar; background:#fff;
+      border-bottom: 1px solid var(--border-default);
+      display:flex; align-items:center; padding: 0 16px; gap: 12px;
+    }
+    .brand { display:flex; align-items:center; gap:10px; font-weight:600; color: var(--fg-strong); letter-spacing:-0.01em; }
+    .brand-mark { width:20px; height:20px; }
+    .mode-switch { display:flex; gap:2px; background: var(--gray-100); padding:3px; border-radius: 6px; margin-left:16px; }
+    .mode-btn { background:transparent; border:0; padding:4px 12px; font:500 13px var(--font-sans); color:var(--fg-secondary); border-radius:4px; cursor:pointer; display:flex; align-items:center; gap:6px; }
+    .mode-btn.active { background:#fff; color:var(--fg-strong); box-shadow: 0 1px 2px rgba(17,24,39,0.06); }
+    .spacer { flex:1; }
+    .search { display:flex; align-items:center; gap:8px; background: var(--gray-50); border:1px solid var(--border-default); border-radius:4px; padding:5px 10px; width:320px; color:var(--fg-muted); }
+    .search input { flex:1; border:0; background:transparent; outline:0; font:400 13px var(--font-sans); color:var(--fg-primary); }
+    .kbd { font:500 10px var(--font-mono); color:var(--fg-muted); background:#fff; border:1px solid var(--border-default); border-radius:3px; padding:1px 5px; }
+    .icon-btn { width:28px; height:28px; border:0; background:transparent; border-radius:4px; display:flex; align-items:center; justify-content:center; color:var(--fg-secondary); cursor:pointer; }
+    .icon-btn:hover { background: var(--gray-100); }
+    .avatar { width:28px; height:28px; border-radius:999px; background:var(--brand-600); color:#fff; font:600 12px var(--font-sans); display:flex; align-items:center; justify-content:center; }
+
+    /* NAV */
+    .nav { grid-area: nav; background: var(--gray-50); border-right: 1px solid var(--border-default); display:flex; flex-direction:column; align-items:center; padding:10px 0; gap:4px; }
+    .nav-btn { width:40px; height:40px; border:0; background:transparent; border-radius:6px; display:flex; align-items:center; justify-content:center; color:var(--fg-muted); cursor:pointer; position:relative; }
+    .nav-btn:hover { background: var(--gray-100); color: var(--fg-primary); }
+    .nav-btn.active { background: var(--brand-50); color: var(--brand-600); }
+    .nav-btn.active::before { content:''; position:absolute; left:-10px; top:8px; bottom:8px; width:3px; background:var(--brand-600); border-radius:0 2px 2px 0; }
+    .nav .divider { width:24px; height:1px; background:var(--border-default); margin:6px 0; }
+
+    /* MAIN */
+    .main { grid-area: main; overflow: hidden; position: relative; background: #fff; display:flex; flex-direction:column; }
+
+    /* STATUS BAR */
+    .statusbar { grid-area: status; background: var(--gray-50); border-top: 1px solid var(--border-default); display:flex; align-items:center; padding:0 12px; gap:16px; font:400 11px var(--font-mono); color:var(--fg-muted); }
+    .statusbar .dot { width:6px; height:6px; border-radius:999px; background: var(--success-500); }
+
+    /* INSPECT */
+    .inspect { grid-area: inspect; background:#fff; border-left:1px solid var(--border-default); overflow-y:auto; display:flex; flex-direction:column; }
+    .inspect header { padding:14px 16px; border-bottom:1px solid var(--border-default); }
+    .inspect h2 { margin:0; font:600 15px var(--font-mono); color:var(--fg-strong); }
+    .inspect .subtitle { font:400 12px var(--font-sans); color:var(--fg-muted); margin-top:2px; }
+    .inspect section { padding:14px 16px; border-bottom:1px solid var(--border-subtle); }
+    .section-label { font:600 10px var(--font-sans); letter-spacing:0.06em; text-transform:uppercase; color:var(--fg-secondary); margin-bottom:8px; }
+    .metric-row { display:flex; justify-content:space-between; align-items:baseline; padding:4px 0; }
+    .metric-row .k { font:400 12px var(--font-sans); color:var(--fg-secondary); }
+    .metric-row .v { font:500 13px var(--font-mono); color:var(--fg-strong); }
+
+    /* PILLS */
+    .pill { display:inline-flex; align-items:center; gap:6px; padding:2px 8px; font:500 11px var(--font-sans); border-radius:999px; background: var(--gray-100); color:var(--fg-secondary); border:1px solid var(--border-default); }
+    .pill-success { background: var(--success-50); color: var(--success-700); border-color:#A7F3D0; }
+    .pill-warning { background: var(--warning-50); color: var(--warning-700); border-color:#FDE68A; }
+    .pill-danger  { background: var(--danger-50);  color: var(--danger-700);  border-color:#FECACA; }
+    .pill-brand   { background: var(--brand-50);   color: var(--brand-700);   border-color: var(--brand-200); }
+    .pill .dot { width:6px; height:6px; border-radius:999px; background: currentColor; }
+
+    .chip { display:inline-flex; align-items:center; gap:6px; padding:3px 8px; font:500 11px var(--font-mono); border-radius:4px; background: var(--gray-100); color: var(--fg-primary); border:1px solid var(--border-default); }
+
+    /* BUTTONS */
+    .btn { display:inline-flex; align-items:center; gap:6px; padding:7px 13px; font:500 13px var(--font-sans); border-radius:4px; border:1px solid var(--border-strong); background:#fff; color:var(--fg-primary); cursor:pointer; transition: background var(--dur-fast) var(--ease-standard); }
+    .btn:hover { background: var(--gray-100); }
+    .btn-primary { background: var(--brand-600); color:#fff; border-color: var(--brand-600); }
+    .btn-primary:hover { background: var(--brand-700); }
+    .btn-sm { padding:4px 9px; font-size:12px; }
+
+    /* GRAPH */
+    .graph-canvas {
+      flex:1; position:relative; overflow:hidden;
+      background:
+        radial-gradient(circle at 1px 1px, #ECEEF2 1px, transparent 0) 0 0 / 16px 16px,
+        #FFFFFF;
+    }
+    .graph-toolbar { position:absolute; top:12px; left:12px; right:12px; display:flex; align-items:center; gap:8px; z-index:2; }
+    .graph-toolbar .left, .graph-toolbar .right { display:flex; align-items:center; gap:8px; }
+    .graph-zoom { position:absolute; bottom:12px; right:12px; display:flex; flex-direction:column; background:#fff; border:1px solid var(--border-default); border-radius:6px; overflow:hidden; z-index:2; }
+    .graph-zoom button { width:28px; height:28px; border:0; background:#fff; color:var(--fg-secondary); cursor:pointer; display:flex; align-items:center; justify-content:center; }
+    .graph-zoom button:hover { background: var(--gray-100); }
+    .graph-zoom button + button { border-top: 1px solid var(--border-default); }
+    .graph-legend { position:absolute; bottom:12px; left:12px; background:#fff; border:1px solid var(--border-default); border-radius:6px; padding:10px 12px; display:flex; gap:14px; z-index:2; font:500 11px var(--font-sans); color:var(--fg-secondary); }
+    .graph-legend .item { display:flex; align-items:center; gap:6px; }
+    .graph-legend .swatch { width:10px; height:10px; border-radius:2px; }
+
+    /* TABLE */
+    .table { width:100%; border-collapse: collapse; font-size:13px; }
+    .table th { text-align:left; font:600 10px var(--font-sans); letter-spacing:0.06em; text-transform:uppercase; color:var(--fg-secondary); padding:8px 12px; border-bottom:1px solid var(--border-default); background: var(--gray-50); position:sticky; top:0; }
+    .table td { padding:8px 12px; border-bottom:1px solid var(--border-subtle); color:var(--fg-primary); }
+    .table tr:hover td { background: var(--gray-50); cursor:pointer; }
+    .table tr.selected td { background: var(--bg-selected); }
+    .mono { font-family: var(--font-mono); }
+    .num  { font-family: var(--font-mono); text-align:right; }
+
+    .kpi-row { display:grid; grid-template-columns: repeat(4, 1fr); gap:10px; padding:16px; }
+    .kpi { background: var(--gray-50); border:1px solid var(--border-default); border-radius:6px; padding:10px 12px; }
+    .kpi .label { font:600 10px var(--font-sans); letter-spacing:0.06em; text-transform:uppercase; color:var(--fg-secondary); }
+    .kpi .val { font:600 22px var(--font-mono); color:var(--fg-strong); margin-top:2px; letter-spacing:-0.01em; }
+    .kpi .delta { font:500 11px var(--font-mono); margin-top:2px; }
+    .kpi .delta.up { color: var(--success-700); }
+    .kpi .delta.down { color: var(--danger-700); }
+    .kpi .delta.warn { color: var(--warning-700); }
+    .kpi .delta.muted{ color: var(--fg-muted); }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width:10px; height:10px; }
+    ::-webkit-scrollbar-thumb { background: var(--gray-300); border-radius:999px; border:2px solid #fff; }
+    ::-webkit-scrollbar-track { background: transparent; }
+
+    /* Fallback while React loads */
+    .splash { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; color: var(--fg-muted); font:500 13px var(--font-sans); gap:8px; }
+  </style>
+</head>
+<body>
+  <div id="root">
+    <div class="splash">
+      <svg width="18" height="18" viewBox="0 0 32 32" fill="none" stroke="#3B4BDB" stroke-width="2" stroke-linecap="round">
+        <circle cx="16" cy="16" r="2.5" fill="#3B4BDB" stroke="none"/>
+      </svg>
+      Loading Cartographer…
+    </div>
+  </div>
+
+  <!-- Inline logo for embedding -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="logo-mark" viewBox="0 0 32 32">
+      <g fill="none" stroke="#3B4BDB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="16" cy="16" r="2.5" fill="#3B4BDB" stroke="none"/>
+        <line x1="16" y1="13.5" x2="16" y2="5"/>
+        <line x1="16" y1="18.5" x2="16" y2="27"/>
+        <line x1="13.5" y1="16" x2="5" y2="16"/>
+        <line x1="18.5" y1="16" x2="27" y2="16"/>
+        <circle cx="16" cy="5" r="2" fill="#FFFFFF"/>
+        <circle cx="16" cy="27" r="2" fill="#FFFFFF"/>
+        <circle cx="5" cy="16" r="2" fill="#FFFFFF"/>
+        <circle cx="27" cy="16" r="2" fill="#FFFFFF"/>
+      </g>
+    </symbol>
+  </svg>
+
+  <script type="text/babel" data-presets="react">
+/* ============================================================
+   CARTOGRAPHER — single-file app
+   All components inlined so this file works from file:// too.
+   ============================================================ */
+const { useState, useEffect, useRef } = React;
+
+/* ---------- Icon helper (Lucide) ---------- */
+const Icon = ({ name, size = 16, ...rest }) => {
+  const ref = useRef(null);
+  useEffect(() => {
+    if (ref.current && window.lucide) {
+      ref.current.innerHTML = '';
+      const el = document.createElement('i');
+      el.setAttribute('data-lucide', name);
+      el.style.width = size + 'px';
+      el.style.height = size + 'px';
+      ref.current.appendChild(el);
+      window.lucide.createIcons({ nameAttr: 'data-lucide' });
+    }
+  }, [name, size]);
+  return <span ref={ref} style={{display:'inline-flex', width:size, height:size, ...(rest.style||{})}} {...rest}/>;
+};
+
+const Logo = ({ size = 20 }) => (
+  <svg width={size} height={size}><use href="#logo-mark"/></svg>
+);
+
+/* ---------- Graph data ---------- */
+const NODES = [
+  { id:'auth/session',   x:430, y:260, kind:'module',   label:'auth/session' },
+  { id:'api/users',      x:620, y:180, kind:'service',  label:'api/users' },
+  { id:'api/billing',    x:650, y:340, kind:'service',  label:'api/billing' },
+  { id:'lib/tracing',    x:260, y:140, kind:'util',     label:'lib/tracing' },
+  { id:'lib/crypto',     x:260, y:380, kind:'util',     label:'lib/crypto' },
+  { id:'db/postgres',    x:820, y:240, kind:'data',     label:'db/postgres' },
+  { id:'db/redis',       x:830, y:400, kind:'data',     label:'db/redis' },
+  { id:'ext/stripe',     x:820, y:500, kind:'external', label:'ext/stripe' },
+  { id:'ext/segment',    x:140, y:230, kind:'external', label:'ext/segment' },
+  { id:'web/portal',     x:420, y:100, kind:'module',   label:'web/portal' },
+  { id:'web/admin',      x:420, y:430, kind:'module',   label:'web/admin' },
+  { id:'lib/features',   x:260, y:260, kind:'util',     label:'lib/features' },
+  { id:'test/e2e',       x:580, y:490, kind:'test',     label:'test/e2e' },
+];
+const EDGES = [
+  ['web/portal','auth/session'], ['web/admin','auth/session'],
+  ['auth/session','api/users'], ['auth/session','api/billing'],
+  ['auth/session','lib/crypto'], ['auth/session','lib/tracing'],
+  ['api/users','db/postgres'], ['api/billing','db/postgres'],
+  ['api/billing','ext/stripe'], ['api/users','db/redis'],
+  ['lib/tracing','ext/segment'], ['lib/features','auth/session'],
+  ['test/e2e','auth/session'], ['web/portal','lib/features'],
+];
+const KIND_FILL = {
+  module:'#3B4BDB', service:'#0EA5E9', data:'#8B5CF6',
+  util:'#14B8A6', external:'#9CA3AF', test:'#F59E0B', deprecated:'#EF4444',
+};
+
+/* ---------- TopBar ---------- */
+const TopBar = ({ mode, setMode }) => {
+  const modes = [
+    { id:'map', label:'Map', icon:'map' },
+    { id:'inspect', label:'Inspect', icon:'search' },
+    { id:'docs', label:'Docs', icon:'file-text' },
+  ];
+  return (
+    <div className="topbar">
+      <div className="brand">
+        <Logo size={20}/>
+        <span>Cartographer</span>
+        <span className="chip" style={{marginLeft:8, fontSize:10, padding:'1px 6px'}}>acme-monorepo</span>
+      </div>
+      <div className="mode-switch" role="tablist">
+        {modes.map(m => (
+          <button key={m.id} className={`mode-btn ${mode===m.id?'active':''}`} onClick={()=>setMode(m.id)}>
+            <Icon name={m.icon} size={14}/>{m.label}
+          </button>
+        ))}
+      </div>
+      <div className="spacer"/>
+      <div className="search">
+        <Icon name="search" size={14}/>
+        <input placeholder="Jump to module, file, owner…"/>
+        <span className="kbd">⌘K</span>
+      </div>
+      <button className="icon-btn" title="Notifications"><Icon name="bell" size={16}/></button>
+      <button className="icon-btn" title="Help"><Icon name="circle-help" size={16}/></button>
+      <div className="avatar">DM</div>
+    </div>
+  );
+};
+
+/* ---------- NavRail ---------- */
+const NavRail = ({ active, setActive }) => {
+  const items = [
+    { id:'map', icon:'map' },
+    { id:'inspect', icon:'box' },
+    { id:'owners', icon:'users' },
+    { id:'docs', icon:'file-text' },
+    { id:'history', icon:'git-commit-horizontal' },
+  ];
+  const bottom = [ { id:'settings', icon:'settings' } ];
+  const render = (it) => (
+    <button key={it.id} className={`nav-btn ${active===it.id?'active':''}`} onClick={()=>setActive(it.id)}>
+      <Icon name={it.icon} size={18}/>
+    </button>
+  );
+  return (
+    <div className="nav">
+      {items.map(render)}
+      <div style={{flex:1}}/>
+      <div className="divider"/>
+      {bottom.map(render)}
+    </div>
+  );
+};
+
+/* ---------- GraphCanvas ---------- */
+const GraphCanvas = ({ selected, setSelected, filters }) => {
+  const node = NODES.find(n => n.id === selected) || NODES[0];
+  const blast = new Set([node.id]);
+  for (let depth=0; depth<2; depth++) {
+    for (const [a,b] of EDGES) {
+      if (blast.has(a)) blast.add(b);
+      if (blast.has(b)) blast.add(a);
+    }
+  }
+  const blastEdges = EDGES.filter(([a,b]) => blast.has(a) && blast.has(b));
+
+  return (
+    <div className="graph-canvas">
+      <div className="graph-toolbar">
+        <div className="left">
+          <button className="btn btn-sm"><Icon name="sliders-horizontal" size={12}/>Filter</button>
+          <span className="chip">type: all</span>
+          <span className="chip">depth: 6</span>
+          <span className="chip" style={{background:'#EEF2FF', color:'#2F3BB8', borderColor:'#C7D2FE'}}>blast radius: on</span>
+        </div>
+        <div className="spacer"/>
+        <div className="right">
+          <button className="btn btn-sm"><Icon name="download" size={12}/>Export</button>
+          <button className="btn btn-primary btn-sm"><Icon name="play" size={12}/>Run analysis</button>
+        </div>
+      </div>
+
+      <svg width="100%" height="100%" viewBox="0 0 960 600" style={{position:'absolute', inset:0}}>
+        {EDGES.map(([a,b], i) => {
+          const na = NODES.find(n=>n.id===a), nb = NODES.find(n=>n.id===b);
+          const isBlast = blastEdges.some(([x,y]) => (x===a&&y===b));
+          return (
+            <line key={i} x1={na.x} y1={na.y} x2={nb.x} y2={nb.y}
+              stroke={isBlast ? '#3B4BDB' : '#E5E7EB'}
+              strokeWidth={isBlast ? 2 : 1.25}
+              opacity={filters.onlyBlast && !isBlast ? 0.2 : 1}
+            />
+          );
+        })}
+        {NODES.map(n => {
+          const isSel = n.id === node.id;
+          const inBlast = blast.has(n.id);
+          const fill = KIND_FILL[n.kind] || '#3B4BDB';
+          const w = Math.max(84, n.label.length * 8);
+          return (
+            <g key={n.id} transform={`translate(${n.x - w/2}, ${n.y - 14})`} style={{cursor:'pointer'}} onClick={()=>setSelected(n.id)}>
+              <rect width={w} height={28} rx="4" ry="4"
+                fill={fill}
+                opacity={filters.onlyBlast && !inBlast ? 0.2 : (inBlast ? 1 : 0.85)}
+                stroke={isSel ? '#1E2570' : 'none'} strokeWidth={isSel ? 2 : 0}
+              />
+              {isSel && (
+                <rect x="-4" y="-4" width={w+8} height="36" rx="6" ry="6"
+                  fill="none" stroke="#3B4BDB" strokeWidth="1.5" strokeDasharray="3 3" opacity="0.6"/>
+              )}
+              <text x={w/2} y="18" textAnchor="middle"
+                fontFamily="JetBrains Mono, monospace" fontSize="11" fill="#fff"
+                fontWeight={isSel ? 600 : 500}>
+                {n.label}
+              </text>
+            </g>
+          );
+        })}
+      </svg>
+
+      <div className="graph-legend">
+        <div className="item"><span className="swatch" style={{background:'#3B4BDB'}}/>Module</div>
+        <div className="item"><span className="swatch" style={{background:'#0EA5E9'}}/>Service</div>
+        <div className="item"><span className="swatch" style={{background:'#8B5CF6'}}/>Data</div>
+        <div className="item"><span className="swatch" style={{background:'#14B8A6'}}/>Util</div>
+        <div className="item"><span className="swatch" style={{background:'#9CA3AF'}}/>External</div>
+        <div className="item"><span className="swatch" style={{background:'#F59E0B'}}/>Test</div>
+      </div>
+      <div className="graph-zoom">
+        <button title="Zoom in"><Icon name="plus" size={14}/></button>
+        <button title="Zoom out"><Icon name="minus" size={14}/></button>
+        <button title="Fit"><Icon name="maximize" size={14}/></button>
+      </div>
+    </div>
+  );
+};
+
+/* ---------- ModulesTable ---------- */
+const ModulesTable = ({ selected, setSelected }) => {
+  const rows = [
+    { id:'auth/session',   owner:'@platform',      callers:247, callees:12, status:'Healthy',    kind:'success', touched:'2h ago' },
+    { id:'api/users',      owner:'@identity',      callers: 89, callees: 8, status:'Healthy',    kind:'success', touched:'1d ago' },
+    { id:'api/billing',    owner:'@billing',       callers: 52, callees:14, status:'Drift',      kind:'warning', touched:'4h ago' },
+    { id:'lib/tracing',    owner:'@observability', callers:412, callees: 2, status:'Healthy',    kind:'success', touched:'3d ago' },
+    { id:'lib/crypto',     owner:'@security',      callers:180, callees: 4, status:'Healthy',    kind:'success', touched:'8d ago' },
+    { id:'lib/features',   owner:'@growth',        callers: 74, callees: 3, status:'Drift',      kind:'warning', touched:'12h ago' },
+    { id:'db/postgres',    owner:'@platform',      callers:122, callees: 0, status:'Healthy',    kind:'success', touched:'5d ago' },
+    { id:'web/admin',      owner:'@internal',      callers:  8, callees:18, status:'Deprecated', kind:'danger',  touched:'42d ago' },
+  ];
+  return (
+    <div style={{overflow:'auto', flex:1}}>
+      <div className="kpi-row">
+        <div className="kpi"><div className="label">Modules</div><div className="val">247</div><div className="delta up">↑ 4 this week</div></div>
+        <div className="kpi"><div className="label">Edges</div><div className="val">1,204</div><div className="delta warn">↑ 52 drift</div></div>
+        <div className="kpi"><div className="label">Orphans</div><div className="val">3</div><div className="delta muted">no change</div></div>
+        <div className="kpi"><div className="label">Deprecated</div><div className="val" style={{color:'var(--danger-700)'}}>7</div><div className="delta down">↓ 2 archived</div></div>
+      </div>
+      <table className="table">
+        <thead>
+          <tr>
+            <th>Module</th><th>Owner</th>
+            <th style={{textAlign:'right'}}>Callers</th>
+            <th style={{textAlign:'right'}}>Callees</th>
+            <th>Status</th><th>Last touched</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map(r => (
+            <tr key={r.id} className={r.id===selected ? 'selected' : ''} onClick={()=>setSelected(r.id)}>
+              <td className="mono" style={{color:r.id===selected?'var(--brand-700)':'var(--fg-primary)', fontWeight:500}}>{r.id}</td>
+              <td>{r.owner}</td>
+              <td className="num">{r.callers}</td>
+              <td className="num">{r.callees}</td>
+              <td><span className={`pill pill-${r.kind}`}><span className="dot"/>{r.status}</span></td>
+              <td style={{color:'var(--fg-muted)'}}>{r.touched}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+};
+
+/* ---------- DocsView ---------- */
+const DocsView = () => (
+  <div style={{display:'grid', gridTemplateColumns:'220px 1fr', height:'100%', overflow:'hidden'}}>
+    <aside style={{background:'var(--gray-50)', borderRight:'1px solid var(--border-default)', padding:'16px 0', overflow:'auto'}}>
+      <div style={{padding:'0 16px 8px', fontSize:10, fontWeight:600, letterSpacing:'0.06em', textTransform:'uppercase', color:'var(--fg-secondary)'}}>Architecture</div>
+      {['Overview','System context','Service catalog','Data flow','ADRs'].map((s,i)=>(
+        <a key={s} href="#" style={{display:'block', padding:'6px 16px', fontSize:13, color:i===1?'var(--brand-700)':'var(--fg-primary)', background:i===1?'var(--brand-50)':'transparent', borderLeft:i===1?'2px solid var(--brand-600)':'2px solid transparent', textDecoration:'none'}}>{s}</a>
+      ))}
+      <div style={{padding:'16px 16px 8px', fontSize:10, fontWeight:600, letterSpacing:'0.06em', textTransform:'uppercase', color:'var(--fg-secondary)'}}>Modules</div>
+      {['auth/session','api/users','api/billing','lib/tracing','lib/crypto'].map(s=>(
+        <a key={s} href="#" style={{display:'block', padding:'5px 16px', fontSize:12, fontFamily:'var(--font-mono)', color:'var(--fg-primary)', textDecoration:'none'}}>{s}</a>
+      ))}
+    </aside>
+    <div style={{overflow:'auto', padding:'40px 56px'}}>
+      <div style={{maxWidth:720}}>
+        <div style={{fontSize:11, fontWeight:600, letterSpacing:'0.06em', textTransform:'uppercase', color:'var(--fg-secondary)'}}>Auto-generated · last built 2h ago</div>
+        <h1 style={{font:'600 36px/1.1 var(--font-sans)', color:'var(--fg-strong)', letterSpacing:'-0.01em', margin:'6px 0 16px'}}>System context</h1>
+        <p style={{fontSize:16, lineHeight:1.6, color:'var(--fg-primary)'}}>
+          The acme-monorepo exposes three user-facing services backed by a shared authentication module. Billing traffic is isolated behind a rate-limited proxy; analytics is fire-and-forget to an external collector.
+        </p>
+        <div style={{display:'flex', gap:8, flexWrap:'wrap', margin:'16px 0'}}>
+          <span className="pill pill-brand">247 modules</span>
+          <span className="pill">14 services</span>
+          <span className="pill">3 data stores</span>
+          <span className="pill pill-warning"><span className="dot"/>52 drift</span>
+        </div>
+        <div style={{border:'1px solid var(--border-default)', borderRadius:6, padding:16, background:'var(--gray-50)', margin:'24px 0'}}>
+          <svg viewBox="0 0 620 200" width="100%" height="180">
+            <g fontFamily="JetBrains Mono" fontSize="10" fill="#fff" textAnchor="middle">
+              <g><rect x="30" y="80" width="110" height="36" rx="4" fill="#9CA3AF"/><text x="85" y="102">users (browser)</text></g>
+              <line x1="140" y1="98" x2="230" y2="98" stroke="#3B4BDB" strokeWidth="2"/>
+              <g><rect x="230" y="80" width="130" height="36" rx="4" fill="#3B4BDB"/><text x="295" y="102">auth/session</text></g>
+              <line x1="360" y1="90" x2="440" y2="50" stroke="#E5E7EB" strokeWidth="1.5"/>
+              <line x1="360" y1="108" x2="440" y2="150" stroke="#E5E7EB" strokeWidth="1.5"/>
+              <g><rect x="440" y="30" width="120" height="36" rx="4" fill="#0EA5E9"/><text x="500" y="52">api/users</text></g>
+              <g><rect x="440" y="130" width="120" height="36" rx="4" fill="#0EA5E9"/><text x="500" y="152">api/billing</text></g>
+            </g>
+          </svg>
+          <div style={{fontSize:11, color:'var(--fg-muted)', textAlign:'center', fontFamily:'var(--font-mono)'}}>Fig. 1 — request flow, auth critical path</div>
+        </div>
+        <h2 style={{font:'600 24px/1.25 var(--font-sans)', color:'var(--fg-strong)', margin:'24px 0 8px'}}>Entry points</h2>
+        <p style={{fontSize:15, lineHeight:1.6, color:'var(--fg-primary)'}}>
+          Every authenticated request enters through <code style={{background:'var(--gray-50)', border:'1px solid var(--border-subtle)', borderRadius:2, padding:'1px 5px', fontFamily:'var(--font-mono)'}}>auth/session.verify</code>. The module validates the JWT against the rotating key in <code style={{background:'var(--gray-50)', border:'1px solid var(--border-subtle)', borderRadius:2, padding:'1px 5px', fontFamily:'var(--font-mono)'}}>lib/crypto</code> and emits a tracing span via <code style={{background:'var(--gray-50)', border:'1px solid var(--border-subtle)', borderRadius:2, padding:'1px 5px', fontFamily:'var(--font-mono)'}}>lib/tracing</code>.
+        </p>
+        <pre style={{background:'var(--gray-50)', border:'1px solid var(--border-default)', borderRadius:6, padding:16, fontSize:13, lineHeight:1.6, overflow:'auto', fontFamily:'var(--font-mono)'}}>
+<span style={{color:'#6B7280'}}>{'// src/auth/session.ts'}</span>{'\n'}
+<span style={{color:'#3B4BDB'}}>export async function</span>{' verify(token: string) {\n  '}
+<span style={{color:'#3B4BDB'}}>const</span>{' key = '}
+<span style={{color:'#3B4BDB'}}>await</span>{' crypto.rotatingKey();\n  '}
+<span style={{color:'#3B4BDB'}}>return</span>{' jwt.verify(token, key);\n}'}</pre>
+      </div>
+    </div>
+  </div>
+);
+
+/* ---------- InspectPanel ---------- */
+const InspectPanel = ({ selected }) => {
+  const data = {
+    'auth/session': {
+      type:'Module', status:{ label:'Healthy', kind:'success' },
+      path:'src/auth/session.ts', lang:'TypeScript',
+      owners:['@platform','@security'],
+      callers:247, callees:12, loc:1420, lastBuild:'1.4s',
+      recent:[
+        { sha:'a1b2c3d', msg:'refactor: extract token rotation helper', who:'@dina', when:'2h' },
+        { sha:'7f9e12a', msg:'fix: clear cookie on logout', who:'@pavan', when:'1d' },
+        { sha:'ef0d33b', msg:'feat: device fingerprint gate', who:'@dina', when:'3d' },
+      ],
+      calleesList:['lib/crypto.sign','lib/tracing.span','api/users.fetch','db/redis.get'],
+    },
+    'api/users': {
+      type:'Service', status:{label:'Healthy',kind:'success'}, path:'services/users/index.ts', lang:'TypeScript',
+      owners:['@identity'], callers:89, callees:8, loc:820, lastBuild:'0.9s',
+      recent:[{sha:'b7f1aa2',msg:'perf: batch user lookups',who:'@pavan',when:'5h'}],
+      calleesList:['db/postgres.query','db/redis.get','lib/tracing.span'],
+    },
+    'api/billing': {
+      type:'Service', status:{label:'Drift',kind:'warning'}, path:'services/billing/index.ts', lang:'TypeScript',
+      owners:['@billing'], callers:52, callees:14, loc:2140, lastBuild:'2.1s',
+      recent:[{sha:'c88e4d1',msg:'feat: dunning flow v2',who:'@dina',when:'4h'}],
+      calleesList:['ext/stripe.charge','db/postgres.query','lib/tracing.span'],
+    },
+  };
+  const d = data[selected] || data['auth/session'];
+  return (
+    <aside className="inspect">
+      <header>
+        <div style={{display:'flex', alignItems:'center', justifyContent:'space-between'}}>
+          <h2>{selected}</h2>
+          <span className={`pill pill-${d.status.kind}`}><span className="dot"/>{d.status.label}</span>
+        </div>
+        <div className="subtitle">{d.type} · {d.lang} · <span className="mono">{d.path}</span></div>
+        <div style={{display:'flex', gap:6, marginTop:10}}>
+          <button className="btn btn-primary btn-sm"><Icon name="radar" size={12}/>Blast radius</button>
+          <button className="btn btn-sm"><Icon name="file-text" size={12}/>Docs</button>
+          <button className="btn btn-sm"><Icon name="external-link" size={12}/>Open</button>
+        </div>
+      </header>
+
+      <section>
+        <div className="section-label">Metrics</div>
+        <div className="metric-row"><span className="k">Callers</span><span className="v">{d.callers}</span></div>
+        <div className="metric-row"><span className="k">Callees</span><span className="v">{d.callees}</span></div>
+        <div className="metric-row"><span className="k">Lines of code</span><span className="v">{d.loc.toLocaleString()}</span></div>
+        <div className="metric-row"><span className="k">Last build</span><span className="v">{d.lastBuild}</span></div>
+      </section>
+
+      <section>
+        <div className="section-label">Owners</div>
+        <div style={{display:'flex', gap:6, flexWrap:'wrap'}}>
+          {d.owners.map(o => <span key={o} className="pill pill-brand">{o}</span>)}
+        </div>
+      </section>
+
+      <section>
+        <div className="section-label">Recent commits</div>
+        {d.recent.map(c => (
+          <div key={c.sha} style={{display:'grid', gridTemplateColumns:'auto 1fr auto', gap:8, padding:'6px 0', borderBottom:'1px solid var(--border-subtle)'}}>
+            <span className="mono" style={{fontSize:11, color:'var(--fg-muted)'}}>{c.sha}</span>
+            <div>
+              <div style={{fontSize:12, color:'var(--fg-primary)'}}>{c.msg}</div>
+              <div style={{fontSize:11, color:'var(--fg-muted)'}}>{c.who} · {c.when} ago</div>
+            </div>
+            <Icon name="chevron-right" size={14}/>
+          </div>
+        ))}
+      </section>
+
+      <section>
+        <div className="section-label">Callees</div>
+        {d.calleesList.map(fn => (
+          <div key={fn} style={{display:'flex', justifyContent:'space-between', padding:'4px 0'}}>
+            <span className="mono" style={{fontSize:12, color:'var(--fg-primary)'}}>{fn}</span>
+            <Icon name="arrow-up-right" size={12}/>
+          </div>
+        ))}
+      </section>
+    </aside>
+  );
+};
+
+/* ---------- App ---------- */
+function App() {
+  const [mode, setMode] = useState('map');
+  const [navActive, setNavActive] = useState('map');
+  const [selected, setSelected] = useState('auth/session');
+  const [filters] = useState({ onlyBlast: false });
+
+  useEffect(() => { if (window.lucide) window.lucide.createIcons(); });
+
+  const main =
+    mode === 'map'     ? <GraphCanvas selected={selected} setSelected={setSelected} filters={filters}/> :
+    mode === 'inspect' ? <ModulesTable selected={selected} setSelected={setSelected}/> :
+                         <DocsView/>;
+
+  return (
+    <div className="app" data-screen-label={`Cartographer · ${mode}`}>
+      <TopBar mode={mode} setMode={(m)=>{ setMode(m); setNavActive(m); }}/>
+      <NavRail active={navActive} setActive={(a)=>{ setNavActive(a); if (['map','inspect','docs'].includes(a)) setMode(a); }}/>
+      <main className="main">{main}</main>
+      <InspectPanel selected={selected}/>
+      <footer className="statusbar">
+        <span className="dot"/>
+        <span>index fresh · built 2h ago</span>
+        <span>·</span>
+        <span>247 modules</span>
+        <span>·</span>
+        <span>1,204 edges</span>
+        <div className="spacer" style={{flex:1}}/>
+        <span>branch main @ a1b2c3d</span>
+      </footer>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+  </script>
+</body>
+</html>
